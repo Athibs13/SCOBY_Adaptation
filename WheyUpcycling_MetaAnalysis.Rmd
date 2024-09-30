@@ -1,0 +1,67 @@
+---
+title: "WheyUpcycling_MetaAnalysis"
+author: "Alyssa Thibodeau"
+date: "2024-07-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#MANOVA with all the data from both experiments 
+```{r}
+
+```
+
+#Correlation matrix with all data 
+```{r}
+library(corrplot)
+
+meta = read.csv("SA_WT_Meta.csv", stringsAsFactors = TRUE)
+
+Tube = meta$Tube
+Substrate = meta$Substrate
+Batch = meta$Batch
+Phase =meta$Phase
+Expt = meta$Experiment
+delta_pellicle = meta$delta_pellicle
+delta_pH = meta$delta_pH
+terminal_pH = meta$Terminal_pH
+Brux = meta$B_brux
+Anomalus = meta$B_anomalus
+Zygo = meta$Zygo
+Star = meta$Starmerella
+Aceto = meta$Acetobacter
+Glucono = meta$Gluconobacter
+Komag =meta$Komagataeibacter
+Lacto = meta$Lactococcus
+Leuco = meta$Leuconostoc
+Pseudo =meta$Pseudomonas
+Strep =meta$Streptococcus
+Acetate = meta$Acetate
+Butyrate =meta$Butyrate
+Choline =meta$Choline
+Citrate = meta$Citrate
+Creatinine = meta$Creatinine
+Ethanol = meta$Ethanol
+Gal = meta$Galactose
+Glu = meta$Glucose
+Gluta = meta$Glutamate
+Isobut =meta$Isobutyrate
+Lactate =meta$Lactate
+Lactose =meta$Lactose
+Malonate =meta$Malonate
+Methylamine =meta$Methylamine
+Valine =meta$Valine
+
+#Create correlation matrix
+my_cor = cor(meta[,-c(1:5)])
+
+#Plot out correlations
+corplot = corrplot(my_cor)
+
+#Heatmap
+heatmap(x = my_cor, symm = TRUE)
+```
+
