@@ -1,0 +1,2362 @@
+---
+title: "SCOBY Adaptation Analyses"
+author: "Alyssa Thibodeau"
+date: "2024-06-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Looking at CFU data for yeast and bacteria 
+```{r}
+library(readxl)
+
+CFU = read_excel("ColonyCounts_Liquid.xlsx")
+
+Batch = CFU$Batch
+Substrate = CFU$Substrate
+yeast_CFU = CFU$Yeast
+bacteria_CFU = CFU$Bacteria
+Batch=as.factor(Batch)
+Substrate=as.factor(Substrate)
+
+yeast_aov <- aov(yeast_CFU ~ Substrate*Batch)
+yeast_aov
+
+#Looking at QQ-plot to assess normality
+plot(yeast_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(yeast_aov, which=1)
+
+#Creating ANOVA table
+anova(yeast_aov)
+
+#Tukey HSD Test
+TukeyHSD(yeast_aov)
+
+
+bacteria_aov <- aov(bacteria_CFU ~ Substrate*Batch)
+bacteria_aov
+
+#Looking at QQ-plot to assess normality
+plot(bacteria_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(bacteria_aov, which=1)
+
+#Creating ANOVA table
+anova(bacteria_aov)
+
+#Tukey HSD Test
+TukeyHSD(bacteria_aov)
+```
+
+
+#Two-way ANOVA for change in and terminal pH
+```{r}
+library(ggplot2)
+
+pH <- read.csv("SA_pH.csv", stringsAsFactors=TRUE)
+pH
+
+
+#Attaching the variable 
+pH_change = pH$delta_pH
+Batch = pH$Batch
+terminal_pH = pH$Terminal_pH
+Substrate = pH$Substrate
+upper = pH$Upper
+lower = pH$Lower
+
+
+#Turns what R thinks is a "numeric" variable into a factor, allowing a TukeyHSD test to be ran
+Substrate = as.factor(Substrate)
+Batch = as.factor(Batch)
+
+
+#Creating aov object
+delta_pH_aov <- aov(pH_change ~ Substrate*Batch)
+delta_pH_aov
+
+#Looking at QQ-plot to assess normality
+plot(delta_pH_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(delta_pH_aov, which=1)
+
+#Creating ANOVA table
+anova(delta_pH_aov)
+
+#Tukey HSD Test
+TukeyHSD(delta_pH_aov)
+
+
+#Creating aov object
+terminal_pH_aov <- aov(terminal_pH ~ Substrate*Batch)
+terminal_pH_aov
+
+#Looking at QQ-plot to assess normality
+plot(terminal_pH_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(terminal_pH_aov, which=1)
+
+#Creating ANOVA table
+anova(terminal_pH_aov)
+
+#Tukey HSD Test
+TukeyHSD(terminal_pH_aov)
+
+
+pH <- read_excel("SA_delta_pH_graph.xlsx")
+pH
+
+
+#Attaching the variable 
+pH_change = pH$delta_pH_avg
+Batch = pH$Batch
+Substrate = pH$Substrate
+upper = pH$Upper
+lower = pH$Lower
+
+
+#Turns what R thinks is a "numeric" variable into a factor, allowing a TukeyHSD test to be ran
+Substrate = as.factor(Substrate)
+Batch = as.factor(Batch)
+
+
+#Bar graph for delta pH
+p2 = ggplot(data=pH, aes(x=Batch, y=pH_change, fill=Substrate)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(vars(Substrate), nrow=1, ncol=3) +
+  scale_x_continuous("Batch", 
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8),
+                     labels = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                     limits = c(0.5, 8.5))+
+  labs(y="Units in pH") +
+  theme(strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +
+  theme(axis.title = element_text(size = 12, color = "black", face = "bold")) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 12)) +
+  scale_fill_manual(name='Variable', labels=c('CTRL-Kombucha (KB)','Gouda (G)', 'Queso Fresco (QF)'), values=c('hotpink', 'darkorange', 'green4')) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2, position=position_dodge(.9))
+```
+#With kombucha samples
+```{r}
+delta_values = read.csv("SA_pH_pellicle.csv", stringsAsFactors = TRUE)
+
+pH_change = delta_values$delta_pH
+Batch = delta_values$Batch
+terminal_pH = delta_values$Terminal_pH
+delta_pel =delta_values$delta_pellicle
+Substrate = delta_values$Substrate
+Batch= as.factor(Batch)
+
+#Creating aov object
+pH_K_aov <- aov(pH_change ~ Substrate*Batch)
+pH_K_aov
+
+#Looking at QQ-plot to assess normality
+plot(pH_K_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(pH_K_aov, which=1)
+
+#Creating ANOVA table
+anova(pH_K_aov)
+
+#Tukey HSD Test
+TukeyHSD(pH_K_aov)
+
+
+#Creating aov object
+pellicle_K_aov <- aov(delta_pel ~ Substrate*Batch)
+pellicle_K_aov
+
+#Looking at QQ-plot to assess normality
+plot(pellicle_K_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(pellicle_K_aov, which=1)
+
+#Creating ANOVA table
+anova(pellicle_K_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(pellicle_K_aov)
+
+
+#Creating aov object
+terminal_pH_aov <- aov(terminal_pH ~ Substrate*Batch)
+terminal_pH_aov
+
+#Looking at QQ-plot to assess normality
+plot(terminal_pH_aov, which=2)
+
+#Looking at residuals plot to assess equal variance
+plot(terminal_pH_aov, which=1)
+
+#Creating ANOVA table
+anova(terminal_pH_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(terminal_pH_aov)
+```
+
+
+
+
+```{r}
+#loading in packages
+library(ggplot2)
+library(patchwork)
+```
+#Read in data set using the data to make a plot with all tubes as a separate line. A plot with lines can be made with all the tubes, but its messy and not valuable to show to variability, but we can assess it 
+```{r}
+continuous <- read.csv("SA_Continuous_pH.csv", stringsAsFactors=TRUE)
+continuous
+```
+
+#Vectors for variables
+```{r}
+pH = continuous$pH
+Day = continuous$Day
+Variable = continuous$Variable
+tube =continuous$Tube
+
+pH_1 = continuous$pH_1
+Day_1 = continuous$Day_1
+Batch_1=continuous$Batch_1
+Variable_tube = continuous$Variable_tube
+```
+
+#Plot with all tubes as a separate line 
+```{r}
+ggplot(continuous, aes(x=Day_1, y=pH_1)) + 
+  geom_line(aes(color=Variable_tube), size=1) +
+  geom_point(shape=19, color='black', fill='black', size=2) +
+  theme(strip.text.x = element_text(size = 15, colour = "black", face="bold")) +
+  labs(title = "Continuous pH", x="Day", y="pH") +
+  theme(axis.title = element_text(size = 14, color = "blue", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=16, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  scale_color_manual(name='Variable and Tube', labels=c('G-1', 'G-2', 'G-3', 'KB-4', 'KB-5', 'KB-6','QF-7', 'QF-8', 'QF-9'), 
+                     values=c('darkorange', 'darkorange','darkorange','green4', 'green4', 'green4','hotpink2', 'hotpink2','hotpink2'))
+```
+
+
+```{r}
+#Reading in revised data set
+continuous1 <- read.csv("SA_continuous_pHavg.csv", stringsAsFactors=TRUE)
+continuous1
+```
+
+
+```{r}
+#Vectors for variables
+Substrate=continuous1$Substrate
+Change_avg = continuous1$Change_avg
+SD= continuous1$SD
+Upper = continuous1$Upper
+Lower = continuous1$Lower
+Batch_avg= continuous1$Batch_avg
+Day_avg = continuous1$Day_avg
+```
+
+
+```{r}
+#Improved plot
+ggplot(continuous1, aes(x=Day_avg, y=Change_avg)) +
+  geom_line(aes(color=Substrate), linewidth=1.5) +
+  scale_x_continuous("Day", 
+                     breaks = c(0, 20, 40, 60, 80, 100, 120),
+                     labels = c("0", "20", "40", "60", "80", "100", "120"),
+                     limits = c(0, 120))+
+  scale_y_continuous("pH")+
+  theme(strip.text.x = element_text(size = 15, colour = "black", face="bold")) +
+  labs(title = "Continuous pH", x="Day", y="pH") +
+  theme(axis.title = element_text(size = 14, color = "blue", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=16, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  labs(title= "Tracking acidifcation of kombucha cultures in different whey substrates using a \nbackslopping inoculation method") +
+  scale_color_manual(name='Variable', labels=c("Gouda", "Kombucha", "Queso Fresco"), 
+                     values=c('violetred1', 'deepskyblue', 'springgreen'))
+  ggsave("continuous.jpg", width = 8, height = 2.5)
+  
+  
+
+ggplot(continuous1, aes(x=Day_avg, y=Change_avg)) +
+  geom_line(aes(color=Substrate), linewidth=1.5) +
+  scale_x_continuous("Day", 
+                     breaks = c(0, 20, 40, 60, 80, 100, 120),
+                     labels = c("0", "20", "40", "60", "80", "100", "120"),
+                     limits = c(0, 120))+
+  scale_y_continuous("pH")+
+  theme(strip.text.x = element_text(size = 15, colour = "black", face="bold")) +
+  labs(x="Day", y="pH") +
+  theme(axis.title = element_text(size = 14, color = "blue", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=16, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  scale_color_manual(name='Variable', labels=c("Gouda", "Kombucha", "Queso Fresco"), 
+                     values=c('darkorange', 'hotpink', 'green4'))
+  ggsave("continuous2.jpg", width = 8, height = 2.5)  
+```
+#Final publication and presentation graphs for tweaking of data
+```{r}
+#Packages needed for continuous line and bar graph
+library(ggplot2)
+library(colorspace)
+library(patchwork)
+library(readxl)
+
+
+#Averaged pH data set (delta and terminal) with Kombucha
+continuous1 <- read.csv("SA_continuous_pHavg.csv", stringsAsFactors=TRUE)
+continuous1
+
+#Vectors for variables 
+Substrate=continuous1$Substrate
+Change_avg = continuous1$Change_avg
+Batch_avg= continuous1$Batch_avg
+Day_avg = continuous1$Day_avg
+
+pH <- read_excel("SA_delta_pH_graph.xlsx")
+pH
+
+
+#Attaching the variable 
+pH_change = pH$delta_pH_avg
+Batch = pH$Batch
+Substrate = pH$Substrate
+upper = pH$Upper
+lower = pH$Lower
+
+
+#Turns what R thinks is a "numeric" variable into a factor, allowing a TukeyHSD test to be ran
+Substrate = as.factor(Substrate)
+Batch = as.factor(Batch)
+
+
+
+#Averaged pellicle data set 
+delta_pellicle_graph <- read.csv("SA_delta_pellicle_graph.csv", stringsAsFactors=TRUE)
+delta_pellicle_graph
+
+
+#Vectors for variables 
+pellicle_change = delta_pellicle_graph$Change_avg
+Batch1 = delta_pellicle_graph$Batch
+Substrate1 = delta_pellicle_graph$Substrate
+sd = delta_pellicle_graph$St_dev
+lower1 = delta_pellicle_graph$Lower
+upper1 = delta_pellicle_graph$Upper
+
+
+#Metabolomic data
+library(ggfortify)
+library(tidyverse)
+library(readxl)
+library(FactoMineR)
+library(factoextra)
+library(scatterplot3d)
+
+meta = read_excel("SA_metabolites_graph.xlsx")
+
+Substrate= meta$Substrate
+Batch= meta$Batch
+metabolites= meta$Metabolites
+sugar=meta$Sugars
+da=meta$Dairy_aroma
+c=meta$Concentration
+c1=meta$Concentration1
+c2=meta$Concentration2
+upper = meta$Upper
+lower = meta$Lower
+upper1 = meta$Upper1
+lower1 = meta$Lower1
+upper2 = meta$Upper2
+lower2 = meta$Lower2
+Substrate= as.factor(Substrate)
+Batch= as.factor(Batch)
+metabolites= as.factor(metabolites)
+sugar= as.factor(sugar)
+da=as.factor(da)
+
+#Loading in data set for heatmap of RA of microbes
+RA_hm = read_excel("SA_RA_microbes.xlsx")
+
+#Vectors for variables
+Substrate= RA_hm$Substrate
+Batch= RA_hm$Batch
+Phase= RA_hm$Phase
+Yeast= RA_hm$Yeast
+Bacteria= RA_hm$Bacteria
+RA_yeast = RA_hm$Relative_abundance
+RA_bacteria = RA_hm$Relative_abundance1
+RA_yeast=as.numeric(RA_yeast)
+RA_bacteria=as.numeric(RA_bacteria)
+
+
+#Palettes
+hcl_palettes(plot = TRUE)
+
+
+#For presentations
+#Continuous pH plot 
+ggplot(continuous1, aes(x=Day_avg, y=Change_avg)) +
+  geom_line(aes(color=Substrate), linewidth=1.5) +
+  scale_x_continuous("Day", 
+                     breaks = c(0, 20, 40, 60, 80, 100, 120),
+                     labels = c("0", "20", "40", "60", "80", "100", "120"),
+                     limits = c(0, 120))+
+  scale_y_continuous("pH")+
+  theme(axis.title = element_text(size = 12, color = "black", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 12)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 12)) +
+  scale_color_manual(name='Variable', labels=c("CTRL-Kombucha", "Gouda", "Queso Fresco"), 
+                     values=c('hotpink', 'darkorange', 'green4'))
+
+#Pellicle bar graph
+ggplot(data=delta_pellicle_graph, aes(x=Batch, y=pellicle_change, fill=Substrate)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(vars(Substrate), nrow=1, ncol=3) +
+  scale_x_continuous("Batch", 
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8),
+                     labels = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                     limits = c(0.5, 8.5))+
+  labs(y="Pellicle mass (g)") +
+  theme(strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +
+  theme(axis.title = element_text(size = 12, color = "black", face = "bold")) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 12)) +
+  scale_fill_manual(name='Variable', labels=c('CTRL-Kombucha (KB)','Gouda (G)', 'Queso Fresco (QF)'), values=c('hotpink', 'darkorange', 'green4')) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2, position=position_dodge(.9))
+
+#Acids
+ggplot(meta, aes(fill = metabolites, x=Batch, y=c)) +
+  geom_bar(stat="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+  scale_x_continuous(name = "Batch", limits = c(0.5, 8.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+  scale_y_continuous(name = "Concentration (μM)", limits = c(0, 205), breaks = c(0, 25, 50, 75, 100, 125, 150, 175, 200)) +
+  theme(strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +
+  theme(axis.title = element_text(size = 12, color = "black", face = "bold")) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 12)) +
+  scale_fill_manual(name = "Fermentation \nMetabolites", breaks=c("Acetate", "Ethanol", "Lactate"), values=c("red", "blue", "#117733"))
+ggsave("SA_acids.jpg", width = 8.9, height = 4)
+
+
+#Sugars
+ggplot(meta, aes(fill = sugar, x=Batch, y=c1)) +
+  geom_bar(stat ="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+  scale_x_continuous(name = "Batch", limits = c(0.5, 8.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+  scale_y_continuous(name = "Concentration (μM)", limits = c(0, 90), breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90)) +
+  theme(strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +
+  theme(axis.title = element_text(size = 12, color = "black", face = "bold")) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 12)) +
+  scale_fill_manual(name = "Residual Sugars", breaks=c("Fructose", "Galactose", "Glucose", "Lactose", "Sucrose"), values=c("#0072b2", "#dc267f", "#d55e00", "#785ef0", "#009e73"))
+ggsave("SA_sugars.jpg", width = 8.9, height = 4)
+
+
+#Dairy aroma cmpds
+ggplot(meta, aes(fill = da, x=Batch, y=c2)) +
+  geom_bar(stat ="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+  scale_x_continuous(name = "Batch", limits = c(0.5, 8.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+  theme(strip.text.x = element_blank())  +
+  labs(y="Concentration (μM)") +
+  labs(caption = "This is my caption") +
+  theme(strip.text.x = element_text(size = 12, colour = "black", face = "bold")) +
+  theme(axis.title = element_text(size = 12, color = "black", face = "bold")) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 12)) +
+  scale_fill_manual(name = "Dairy Aroma \nCompounds", breaks=c("Acetoin", "Butyrate", "Isobutyrate"), values=c("#cc79a7", "#882255", "#aa4499"))
+ggsave("SA_dairyaromatics.jpg", width = 8.9, height = 4)
+
+
+
+
+
+#For publications
+p1 = ggplot(continuous1, aes(x=Day_avg, y=Change_avg)) +
+  geom_line(aes(color=Substrate), linewidth=1.5) +
+  scale_x_continuous("Day", 
+                     breaks = c(0, 20, 40, 60, 80, 100, 120),
+                     labels = c("0", "20", "40", "60", "80", "100", "120"),
+                     limits = c(0, 120)) +
+  scale_y_continuous("pH") +
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(legend.title = element_blank()) +
+  theme(legend.position = "top") +
+  theme(legend.text = element_text(colour="black", size = 9)) +
+  scale_color_manual(name='Variable', labels=c("CTRL-Kombucha", "Gouda", "Queso Fresco"), values=c('hotpink', 'darkorange', 'green4'))
+
+
+
+#Bar graph for delta pH
+p2 = ggplot(data=pH, aes(x=Batch, y=pH_change, fill=Substrate)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(vars(Substrate), nrow=1, ncol=3) +
+  scale_x_continuous("",
+                    breaks = c(1, 2, 3, 4, 5, 6, 7, 8),
+                     labels = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                     limits = c(0.5, 8.5))+
+  labs(y="Units of pH") +
+  theme(strip.text.x = element_blank())  +  
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(legend.position="none") +
+  scale_fill_manual(values=c('hotpink', 'darkorange', 'green4')) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2, position=position_dodge(.9))
+
+
+
+p3 = ggplot(data=delta_pellicle_graph, aes(x=Batch1, y=pellicle_change, fill=Substrate)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(vars(Substrate), nrow=1, ncol=3) +
+  scale_x_continuous("Batch", 
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8),
+                     labels = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                     limits = c(0.5, 8.5))+
+  labs(x="Batch", y="Pellicle mass (g)") +
+  theme(strip.text.x = element_blank())  +
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(legend.position="none") +
+  scale_fill_manual(values=c('hotpink', 'darkorange', 'green4')) +
+  geom_errorbar(aes(ymin=lower1, ymax=upper1), width=0.2, position=position_dodge(.9))
+ 
+  
+p1 + p2 + p3 + plot_layout(nrow=3, byrow = FALSE)
+ggsave("SA_pellicle_pH.jpg", width = 8.9, height = 6)
+
+
+
+p4 = ggplot(meta, aes(fill = metabolites, x=Batch, y=c)) +
+  geom_bar(stat="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+  scale_x_continuous(limits = c(0.5, 8.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+  scale_y_continuous(limits = c(0, 205), breaks = c(0, 50, 100, 150, 200)) +
+  theme(strip.text.x = element_blank())  +
+  theme(axis.title = element_blank()) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(legend.title = element_blank()) +
+  theme(legend.text = element_text(colour="black", size = 9)) 
+p4 = p4 + scale_fill_manual(breaks=c("Acetate", "Ethanol", "Citrate", "Lactate"), values=c("red", "blue", "#117733", "chocolate2")) 
+p4 = p4 + geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2, position=position_dodge(.9))
+ggsave("SA_acids.jpg", width = 8.9, height = 4)
+
+
+
+p5 = ggplot(meta, aes(fill = sugar, x=Batch, y=c1)) +
+  geom_bar(stat ="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+    scale_x_continuous("", limits = c(0.5, 8.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+    scale_y_continuous("Concentration (mM)", limits = c(0, 90), breaks = c(0, 30, 60, 90)) +
+  theme(strip.text.x = element_blank())  +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(legend.title = element_blank()) +  
+  theme(legend.text = element_text(colour="black", size = 9))
+p5 = p5 + scale_fill_manual(breaks=c("Fructose", "Galactose", "Glucose", "Lactose", "Sucrose"), values=c("#0072b2", "#dc267f", "#d55e00", "#785ef0", "#009e73"))
+p5 = p5 + geom_errorbar(aes(ymin=lower1, ymax=upper1), width=0.2, position=position_dodge(.9))
+ggsave("SA_sugars.jpg", width = 8.9, height = 4)
+
+
+
+p6 = ggplot(meta, aes(fill = da, x=Batch, y=c2)) +
+  geom_bar(stat ="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+  scale_x_continuous("Batch", limits = c(0.5, 8.5), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+  theme(axis.title.y = element_blank()) +
+  theme(strip.text.x = element_blank())  +
+  theme(plot.caption = element_text(hjust=0)) +
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(legend.title = element_blank()) +
+  theme(legend.text = element_text(colour="black", size = 9))
+p6 = p6 + scale_fill_manual(breaks=c("Acetoin", "Butyrate", "Isobutyrate"),
+values=c("#cc79a7", "#882255", "#aa4499"))
+p6 = p6 + geom_errorbar(aes(ymin=lower2, ymax=upper2), width=0.2, position=position_dodge(.9))
+ggsave("SA_dairyaromatics.jpg", width = 8.9, height = 4)
+
+
+p4 + p5 + p6 + plot_layout(nrow=3, byrow = FALSE)
+ggsave("SA_analytes.jpg", width = 8.9, height = 4)
+
+
+
+#Ordination matrix
+adapt_ITS.ordA <- ordinate(adapt_ITS, "NMDS", "bray")
+adapt_16S.ordA <- ordinate(adapt_16S, "NMDS", "bray")
+
+
+#Polygon graphs with Bray-Curtis dissimilarity matrix as point plotted 
+#For ITS data
+P1= plot_ordination(adapt_ITS, adapt_ITS.ordA, "Samples", color="Batch1")
+P1= P1 + facet_grid(Phase ~ Substrate)
+P1= P1 + geom_polygon(aes(fill=Batch1)) +
+  scale_fill_brewer(type="seq", palette="YlOrRd", aesthetics = c("color", "fill")) + 
+  theme(legend.position = "none") +
+  theme(strip.text.x = element_text(size = 9, colour = "black")) +
+  theme(strip.text.y = element_blank()) +
+  theme(axis.text = element_text(color = "black", size = 9)) 
+ggsave("SA_BetaDiversity_ITS_Polygons.jpg", width = 8, height = 6)
+
+
+#Bray-curtis NMDS plot for 16S data
+P2= plot_ordination(adapt_16S, adapt_16S.ordA, "Samples", color="Batch")
+P2= P2 + facet_grid(Phase ~ Substrate)
+P2= P2 + geom_polygon(aes(fill=Batch)) +
+  scale_fill_brewer(type="seq", palette="YlOrRd", aesthetics = c("color", "fill")) +
+  theme(strip.text.x = element_text(size = 9, colour = "black")) +
+  theme(strip.text.y = element_text(size = 9, colour = "black")) +
+  theme(legend.title = element_text(colour="black", size=10)) +
+  theme(legend.text = element_text(colour="black", size = 9)) +
+  theme(axis.text = element_text(color = "black", size = 9)) 
+ggsave("SA_BetaDiversity_16S_Polygons.jpg", width = 8.9, height = 4)
+
+#Patching ITS/16S together as a single column
+P1 + P2
+ggsave("SA_BetaDiversity_Polygons.jpg", width = 8.9, height = 4)
+
+
+yeast_order = c("Brettanomyces anomalus", "Brettanomyces bruxellensis", "Zygosaccharomyces sp.", "Starmerella davenportii")
+
+bacteria_order = c("Acetobacter sp.", "Gluconobacter sp.", "Komagataeibacter sp.", "Leuconostoc sp.")
+
+
+# Ensure the Yeast column has the specified order and then reverse it
+df$Yeast <- factor(df$Yeast, levels = yeast_order)
+
+#Heatmap for ITS metabarcoding data
+h1 = ggplot(RA_hm, aes(x = Batch, y = Yeast, fill = RA_yeast)) +
+  geom_tile(color="grey32") +
+  facet_grid(Phase~Substrate) +
+  scale_x_continuous("Batch", 
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8),
+                     labels = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                     limits = c(0.5, 8.5)) +
+  scale_y_discrete("Species", labels = yeast_order) +
+  theme(axis.text.y = element_text(face="italic")) +
+  theme(strip.text.x = element_text(size = 9, colour = "black")) +
+  theme(strip.text.y = element_blank()) +
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(aspect.ratio = 1) +  # Adjust the aspect ratio here
+  theme(legend.position = "none") +
+  scale_fill_gradient(name="Relative\nAbundance", low = "white", high = "purple2", limits = c(0, 100))
+
+
+#Heatmap for 16S metabarcoding data
+h2 = ggplot(RA_hm, aes(x = Batch, y = Bacteria, fill = RA_bacteria)) +
+  geom_tile(color="grey32") +
+  facet_grid(Phase~Substrate) +
+  scale_x_continuous("Batch", 
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8),
+                     labels = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                     limits = c(0.5, 8.5)) +
+  scale_y_discrete("Genus", labels = bacteria_order) +
+  theme(axis.text.y = element_text(face="italic")) +
+  theme(strip.text.x = element_text(size = 9, colour = "black")) +
+  theme(axis.title = element_text(size = 9, color = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8)) +
+  theme(legend.title = element_text(colour="black", size=10)) +
+  theme(legend.text = element_text(colour="black", size = 9)) +
+  theme(aspect.ratio = 1) +  # Adjust the aspect ratio here
+  scale_fill_gradient(name="Relative\nAbundance", low = "white", high = "purple2", limits = c(0, 100))
+
+h1 + h2
+ggsave("SA_heatmap.jpg", width = 8.9, height = 4)
+```
+
+
+
+
+```{r}
+#Reading in data set with only gouda and QF
+delta_pellicle <- read.csv("SA_delta_pellicle.csv", stringsAsFactors=TRUE)
+delta_pellicle
+
+#Attaching the variable 
+pellicle_change = delta_pellicle$delta_pellicle
+Batch = delta_pellicle$Batch
+Substrate = delta_pellicle$Substrate
+sd = delta_pellicle$St_dev
+
+#Turns what R thinks is a "numeric" variable into a factor, allowing a TukeyHSD test to be ran
+Substrate = as.factor(Substrate)
+Batch = as.factor(Batch)
+
+#Creating aov object
+delta_pellicle_aov <- aov(pellicle_change ~ Substrate*Batch)
+delta_pellicle_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(delta_pellicle_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. Shows some funneling and could be fixed by doing a log transformation, but ignoring for now
+plot(delta_pellicle_aov, which=1)
+
+
+#Creating ANOVA table
+anova(delta_pellicle_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(delta_pellicle_aov)
+```
+
+#Bar graph of pellicle weight gain from day 0 to day 14. Reading in data set with all three substrates. There are 3 batches with kombucha and eight for the two wheys
+```{r}
+delta_pellicle_graph <- read.csv("SA_delta_pellicle_graph.csv", stringsAsFactors=TRUE)
+delta_pellicle_graph
+
+
+pellicle_change = delta_pellicle_graph$Change_avg
+Batch = delta_pellicle_graph$Batch
+Variable = delta_pellicle_graph$Variable
+sd = delta_pellicle_graph$St_dev
+lower = delta_pellicle_graph$Lower
+upper = delta_pellicle_graph$Upper
+
+
+ggplot(data=delta_pellicle_graph, aes(x=Batch, y=pellicle_change, fill=Variable)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(vars(Variable), nrow=1, ncol=3) +
+  theme(strip.text.x = element_text(size = 15, colour = "black", face="bold")) +
+  labs(title = "Change in Pellicle Mass", x="Batch", y="Mass gain (g)") +
+  theme(axis.title = element_text(size = 14, color = "blue", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=16, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  scale_fill_manual(name='Variable', labels=c('Gouda (G)', 'Kombucha (KB)','Queso Fresco (QF)'), 
+                   values=c('darkorange', 'hotpink', 'green4')) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2, position=position_dodge(.9))
+  ggsave("SA_delta_pellicle.jpg", width = 8, height = 2.5)
+```
+
+#Metbarcoding data processing
+```{r}
+#Load in Libraries
+library(stringi)
+library(phyloseq)
+library(ggplot2)
+library(dplyr)
+library(ape)
+library(agricolae)
+library(S4Vectors)
+library(vegan)
+library(tibble)
+library(readxl)
+library(colorspace)
+```
+
+```{r}
+#Exploring color palettes in colorspace
+hcl_palettes(plot = TRUE)
+
+#Read in ITS Data for SCOBY Adaptation
+otu_ITS<- read_excel("OTU_ITS_SA.xlsx")
+otu_ITS_PhaseL<- read_excel("OTU_ITS_SA_PhaseL.xlsx")
+otu_ITS_PhaseS<- read_excel("OTU_ITS_SA_PhaseS.xlsx")
+tax_ITS<- read_excel("taxonomy_ITS.xlsx")
+
+
+#Reading in OTU tables with and without kombucha to do PERMANOVA (pairwise comparison)
+otu_16S_K = read_excel("OTU_16S_SA_K.xlsx")
+otu_16S_noK = read_excel("OTU_16S_SA_noK.xlsx")
+otu_ITS_K = ("OTU_ITS_SA_K.xlsx")
+otu_ITS_noK = ("OTU_ITS_SA_noK.xlsx")
+
+#Read in 16S data for SCOBY Adaptation:
+tax_16S<- read_excel("taxonomy_16S.xlsx")
+otu_16S<- read_excel("OTU_16S_SA.xlsx") 
+otu_16S_PhaseL<- read_excel("OTU_16S_SA_PhaseL.xlsx")
+otu_16S_PhaseS<- read_excel("OTU_16S_SA_PhaseS.xlsx")
+
+#Reading in sample sheet with both phases, used for both ITS and 16S
+samples_avg_SA <- read_excel("SampleInfo_Avg_SA.xlsx")
+samples_SA <- read_excel("SampleInfo_SA.xlsx")
+samples_SA1 <- read_excel("SampleInfo1_SA.xlsx")
+
+
+#Read in samples from SCOBY adaptation experiment by splitting the phase variable into solid and liquid, using the averaged sample data and RA
+samples_PhaseL <- read_excel("SampleInfo_Avg_PhaseL.xlsx")
+samples_PhaseS <- read_excel("SampleInfo_Avg_PhaseS.xlsx")
+
+
+#Changing batch to factor variable instead of being interpreted as continuous
+samples_avg_SA$Batch = factor(samples_SA$Batch)
+samples_SA$Batch = factor(samples_SA$Batch)
+samples_SA1$Batch1 = factor(samples_SA1$Batch1)
+
+samples_PhaseL$Batch = factor(samples_PhaseL$Batch)
+samples_PhaseS$Batch = factor(samples_PhaseS$Batch)
+```
+
+
+```{r}
+#Define the row names from the otu column 'index'
+otu_ITS <- otu_ITS %>%
+  tibble::column_to_rownames("index")
+
+otu_ITS_PhaseL <- otu_ITS_PhaseL %>%
+  tibble::column_to_rownames("index")
+
+otu_ITS_PhaseS <- otu_ITS_PhaseS %>%
+  tibble::column_to_rownames("index")
+
+
+otu_16S <- otu_16S %>%
+  tibble::column_to_rownames("index")
+
+otu_16S_PhaseL <- otu_16S_PhaseL %>%
+  tibble::column_to_rownames("index")
+
+otu_16S_PhaseS <- otu_16S_PhaseS %>%
+  tibble::column_to_rownames("index")
+
+#Rows for special datasets split for doing PERMANOVA
+otu_ITS_K <- otu_ITS_K %>%
+  tibble::column_to_rownames("index")
+
+otu_ITS_noK <- otu_ITS_noK %>%
+  tibble::column_to_rownames("index")
+
+otu_16S_K <- otu_16S_K %>%
+  tibble::column_to_rownames("index")
+
+otu_16S_noK <- otu_16S_noK %>%
+  tibble::column_to_rownames("index")
+
+#Idem for the two other matrices 
+tax_ITS <- tax_ITS %>% 
+  tibble::column_to_rownames("index")
+
+tax_16S <- tax_16S %>% 
+  tibble::column_to_rownames("index")
+
+
+#Idem for the two other matrices using the data with phase variable split, sample averages, and RA
+samples_avg_SA <- samples_avg_SA %>% 
+  tibble::column_to_rownames("Sample_ID")
+
+samples_SA <- samples_SA %>% 
+  tibble::column_to_rownames("Sample_ID")
+
+samples_SA1 <- samples_SA1 %>% 
+  tibble::column_to_rownames("Sample_ID")
+
+
+samples_PhaseL <- samples_PhaseL %>% 
+  tibble::column_to_rownames("Sample_ID")
+
+samples_PhaseS <- samples_PhaseS %>% 
+  tibble::column_to_rownames("Sample_ID")
+
+
+#Transform otu and tax tables into matrices (sample table can be left as data frame) for ITS data
+otu_ITS <- as.matrix(otu_ITS)
+otu_ITS_PhaseL <- as.matrix(otu_ITS_PhaseL)
+otu_ITS_PhaseS <- as.matrix(otu_ITS_PhaseS)
+tax_ITS <- as.matrix(tax_ITS)
+
+
+otu_ITS_K <- as.matrix(otu_ITS_K)
+otu_ITS_noK <- as.matrix(otu_ITS_noK)
+otu_16S_K <- as.matrix(otu_16S_K)
+otu_16S_noK <- as.matrix(otu_16S_noK)
+
+
+#Same thing for 16S data
+otu_16S <- as.matrix(otu_16S)
+otu_16S_PhaseS <- as.matrix(otu_16S_PhaseS)
+otu_16S_PhaseL <- as.matrix(otu_16S_PhaseL)
+tax_16S <- as.matrix(tax_16S)
+
+
+#Transform to phyloseq objects, ITS data
+OTU_ITS = otu_table(otu_ITS, taxa_are_rows = TRUE)
+OTU_ITS_PhaseL = otu_table(otu_ITS_PhaseL, taxa_are_rows = TRUE)
+OTU_ITS_PhaseS = otu_table(otu_ITS_PhaseS, taxa_are_rows = TRUE)
+
+#16S data
+OTU_16S = otu_table(otu_16S, taxa_are_rows = TRUE)
+OTU_16S_PhaseL = otu_table(otu_16S_PhaseL, taxa_are_rows = TRUE)
+OTU_16S_PhaseS = otu_table(otu_16S_PhaseS, taxa_are_rows = TRUE)
+
+
+#Special data sets for PERMANOVA
+OTU_ITS_K = otu_table(otu_ITS_K, taxa_are_rows = TRUE)
+OTU_ITS_noK = otu_table(otu_ITS_noK, taxa_are_rows = TRUE)
+OTU_16S_K = otu_table(otu_16S_K, taxa_are_rows = TRUE)
+OTU_16S_noK = otu_table(otu_16S_noK, taxa_are_rows = TRUE)
+
+
+#Taxonomy tables for 16S and ITS
+TAX_ITS =tax_table(tax_ITS)
+TAX_16S =tax_table(tax_16S)
+
+
+#Phyloseq object using with and without phase variable split
+samples_avg_SA = sample_data(samples_avg_SA)
+samples_SA = sample_data(samples_SA)
+samples_SA1 = sample_data(samples_SA1)
+
+samples_PhaseL = sample_data(samples_PhaseL)
+samples_PhaseS = sample_data(samples_PhaseS)
+
+
+#Combine otu and taxa matrices with sample table, with and without splitting using the phase variable - S or L
+adapt_ITS <- phyloseq(OTU_ITS, TAX_ITS, samples_SA1)
+adapt_ITS
+
+adapt_ITS_L <- phyloseq(OTU_ITS_PhaseL, TAX_ITS, samples_PhaseL)
+adapt_ITS_L
+
+adapt_ITS_S <- phyloseq(OTU_ITS_PhaseS, TAX_ITS, samples_PhaseS)
+adapt_ITS_S
+
+adapt_ITS_K <- phyloseq(OTU_ITS_K, TAX_ITS, samples_SA)
+adapt_ITS_K
+
+adapt_ITS_noK <- phyloseq(OTU_ITS_noK, TAX_ITS, samples_SA)
+adapt_ITS_noK
+
+
+#Phyloseq object for 16S data
+adapt_16S <- phyloseq(OTU_16S, TAX_16S, samples_SA)
+adapt_16S
+
+adapt_16S_L <- phyloseq(OTU_16S_PhaseL, TAX_16S, samples_PhaseL)
+adapt_16S_L
+
+adapt_16S_S <- phyloseq(OTU_16S_PhaseS, TAX_16S, samples_PhaseS)
+adapt_16S_S
+
+adapt_16S_K <- phyloseq(OTU_16S_K, TAX_16S, samples_SA)
+adapt_16S_K
+
+adapt_16S_noK <- phyloseq(OTU_16S_noK, TAX_16S, samples_SA)
+adapt_16S_noK
+
+#Visualize sample names
+sample_names(adapt_ITS)
+sample_names(adapt_16S)
+
+sample_names(adapt_ITS_S)
+sample_names(adapt_ITS_L)
+sample_names(adapt_16S_S)
+sample_names(adapt_16S_L)
+
+sample_names(adapt_16S_K)
+sample_names(adapt_16S_noK)
+sample_names(adapt_ITS_K)
+sample_names(adapt_ITS_noK)
+
+
+#Rank taxonomy group names
+rank_names(adapt_ITS)
+rank_names(adapt_16S)
+
+rank_names(adapt_ITS_S)
+rank_names(adapt_ITS_L)
+rank_names(adapt_16S_S)
+rank_names(adapt_16S_L)
+
+rank_names(adapt_ITS_K)
+rank_names(adapt_ITS_noK)
+rank_names(adapt_16S_K)
+rank_names(adapt_16S_noK)
+
+
+#visualize variables in meta data
+sample_variables(adapt_ITS)
+sample_variables(adapt_16S)
+
+sample_variables(adapt_ITS_S)
+sample_variables(adapt_ITS_L)
+sample_variables(adapt_16S_S)
+sample_variables(adapt_16S_L)
+
+sample_variables(adapt_ITS_K)
+sample_variables(adapt_ITS_noK)
+sample_variables(adapt_16S_K)
+sample_variables(adapt_16S_noK)
+
+#Normalize number of reads in each sample using median sequencing depth
+total1=median(sample_sums(adapt_ITS))
+total2=median(sample_sums(adapt_16S))
+
+totala = median(sample_sums(adapt_ITS_L))
+totalb = median(sample_sums(adapt_ITS_S))
+
+totalc = median(sample_sums(adapt_16S_L))
+totald = median(sample_sums(adapt_16S_S))
+
+
+total3 = median(sample_sums(adapt_ITS_K))
+total4 = median(sample_sums(adapt_ITS_noK))
+
+total5 = median(sample_sums(adapt_16S_K))
+total6 = median(sample_sums(adapt_16S_noK))
+
+
+#SCOBY Adaptation expt
+standf1 = function(x, t=total1) round(t * (x / sum(x)))
+standf2 = function(x, t=total2) round(t * (x / sum(x)))
+
+standfa = function(x, t=totala) round(t * (x / sum(x)))
+standfb = function(x, t=totalb) round(t * (x / sum(x)))
+
+standfc = function(x, t=totalc) round(t * (x / sum(x)))
+standfd = function(x, t=totald) round(t * (x / sum(x)))
+
+standf3 = function(x, t=total3) round(t * (x / sum(x)))
+standf4 = function(x, t=total4) round(t * (x / sum(x)))
+
+standf5 = function(x, t=total5) round(t * (x / sum(x)))
+standf6 = function(x, t=total6) round(t * (x / sum(x)))
+
+#transform counts
+adapt_ITS = transform_sample_counts(adapt_ITS, standf1)
+adapt_16S = transform_sample_counts(adapt_16S, standf2)
+
+adapt_ITS_L = transform_sample_counts(adapt_ITS_L, standfa)
+adapt_ITS_S = transform_sample_counts(adapt_ITS_S, standfb)
+
+adapt_16S_L = transform_sample_counts(adapt_16S_L, standfc)
+adapt_16S_S = transform_sample_counts(adapt_16S_S, standfd)
+
+
+adapt_ITS_K = transform_sample_counts(adapt_ITS_K, standf3)
+adapt_ITS_noK = transform_sample_counts(adapt_ITS_noK, standf4)
+
+adapt_16S_K = transform_sample_counts(adapt_16S_K, standf5)
+adapt_16S_noK = transform_sample_counts(adapt_16S_noK, standf6)
+```
+
+
+```{r}
+#Alpha Diversity
+richnessA <- estimate_richness(adapt_ITS, measures = "Shannon")
+richnessB <- estimate_richness(adapt_16S, measures = "Shannon")
+
+
+#ITS Liquid phase
+richnessAL <- estimate_richness(adapt_ITS_L, measures = "Shannon")
+#ITS Solid phase
+richnessAS <- estimate_richness(adapt_ITS_S, measures = "Shannon")
+
+#16S Liquid phase
+richnessBL <- estimate_richness(adapt_16S_L, measures = "Shannon")
+#16S Solid phase
+richnessBS <- estimate_richness(adapt_16S_S, measures = "Shannon")
+
+
+#Alpha diversity using Shannon index (ITS - SA)
+P0= plot_richness(adapt_ITS, measures=c("Shannon"), 
+                  x= "Substrate", color = "Batch",
+                  title="ITS Alpha diversity - Shannon index")
+P0= P0 + facet_wrap(~Phase) 
+P0= P0 + scale_color_discrete_qualitative(palette = "Dark3")
+P0= P0+ theme(strip.text.x = element_text(size = 12, colour = "black", face="bold")) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+ggsave("SA_AlphaDiversity_ITS.jpg", width = 8, height = 6)
+
+#Alpha diversity using Shannon index (16S - SA)
+P1= plot_richness(adapt_16S, measures=c("Shannon"), 
+                  x= "Substrate", color = "Batch",
+                  title="16S Alpha diversity - Shannon index")
+P1= P1 + facet_wrap(~Phase)
+P1= P1 + scale_color_discrete_qualitative(palette = "Dark3")
+P1= P1+ theme(strip.text.x = element_text(size = 12, colour = "black", face="bold")) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  theme(axis.text = element_text(color = "black", size = 10)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+ggsave("SA_AlphaDiversity_16S.jpg", width = 8, height = 6)
+
+
+#Have to make an interaction term for use in the aov object and tukey HSD multi comparison test function
+
+trt_ITS = with(adapt_ITS, interaction(sample_data(adapt_ITS)$Batch, sample_data(adapt_ITS)$Substrate, sample_data(adapt_ITS)$Phase))
+
+trt_16S = with(adapt_16S, interaction(sample_data(adapt_16S)$Batch, sample_data(adapt_16S)$Substrate, sample_data(adapt_16S)$Phase))
+
+
+
+trt = with(adapt_ITS_L, interaction(sample_data(adapt_ITS_L)$Batch, sample_data(adapt_ITS_L)$Substrate))
+
+trt1 = with(adapt_ITS_S, interaction(sample_data(adapt_ITS_S)$Batch, sample_data(adapt_ITS_S)$Substrate))
+
+trt2 = with(adapt_16S_L, interaction(sample_data(adapt_16S_L)$Batch, sample_data(adapt_16S_L)$Substrate))
+
+trt3 = with(adapt_16S_S, interaction(sample_data(adapt_16S_S)$Batch, sample_data(adapt_16S_S)$Substrate))
+  
+
+
+#alpha anova:
+aova.sh_ITS <- aov(richnessA$Shannon ~ sample_data(adapt_ITS)$Substrate + sample_data(adapt_ITS)$Batch + sample_data(adapt_ITS)$Phase + trt_ITS)
+summary(aova.sh_ITS)
+
+aova.sh_16S <- aov(richnessB$Shannon ~ sample_data(adapt_16S)$Substrate + sample_data(adapt_16S)$Batch + sample_data(adapt_16S)$Phase + trt_16S)
+summary(aova.sh_16S)
+
+aova.sh <- aov(richnessAL$Shannon ~ sample_data(adapt_ITS_L)$Substrate + sample_data(adapt_ITS_L)$Batch)
+summary(aova.sh)
+
+aova.sh1 <- aov(richnessAL$Shannon ~ trt)
+summary(aova.sh1)
+
+aova.sh2 <- aov(richnessAS$Shannon ~ trt1)
+summary(aova.sh2)
+
+aova.sh3 <- aov(richnessAS$Shannon ~ sample_data(adapt_ITS_S)$Substrate + sample_data(adapt_ITS_S)$Batch)
+summary(aova.sh3)
+
+aova.sh2 <- aov(richnessB$Shannon ~ sample_data(adapt_16S)$Substrate + sample_data(adapt_16S)$Batch)
+summary(aova.sh2)
+
+aova.sh3 <- aov(richnessB$Shannon ~ trt1)
+summary(aova.sh3)
+
+#alpha tukey:
+tukA1 <- HSD.test(aova.sh1, "trt", group = TRUE)
+print(tukA1)
+
+tukA2 <- HSD.test(aova.sh_ITS, "trt_ITS", group = TRUE)
+print(tukA2)
+
+tukA21 <- HSD.test(aova.sh_16S, "trt_16S", group = TRUE)
+print(tukA21)
+
+tukA3 <- HSD.test(aova.sh3, "trt1", group = TRUE)
+print(tukA3)
+```
+
+
+#Beta Diversity. Do multivariate analysis based on Bray-Curtis distance and NMDS ordination
+```{r}
+adapt_ITS.ordA <- ordinate(adapt_ITS, "NMDS", "bray")
+adapt_16S.ordA <- ordinate(adapt_16S, "NMDS", "bray")
+
+#Heat map using phyloseq object
+solid <- subset_taxa(adapt_ITS_S, Kingdom == "Fungi")
+liquid <- subset_taxa(adapt_ITS_L, Kingdom == "Fungi")
+
+bacteriaL <- subset_taxa(adapt_16S_L, Domain == "Bacteria")
+bacteriaS <- subset_taxa(adapt_16S_S, Domain == "Bacteria")
+
+
+#Custom order for the solid and liquid phase 
+custom_orderS <- c("B2GS", "B3GS", "B4GS", "B5GS", "B6GS", "B7GS", "B8GS", "B1KBS", "B2KBS", "B3KBS", "B4KBS", "B5KBS", "B6KBS", "B7KBS", "B8KBS", "B2QFS","B3QFS", "B4QFS", "B5QFS", "B6QFS", "B7QFS", "B8QFS")
+  
+custom_orderL <- c("B1GL", "B2GL", "B3GL", "B4GL", "B5GL", "B6GL", "B7GL", "B8GL", "B1KBL", "B2KBL", "B3KBL", "B1QFL", "B2QFL", "B3QFL", "B4QFL", "B5QFL", "B6QFL", "B7QFL", "B8QFL")
+
+
+#Plotting ITS data solid and liquid separately, heatmap of Bray Curtis NMDS 
+solid1 =plot_heatmap(solid, "NMDS", "bray", "Batch", "Species", na.value="white", title= "Beta Diversity - Bray Curtis NMDS Plot - Solid Samples", sample.order = custom_orderS)
+solid1 = solid1 + facet_wrap(vars(Substrate), nrow=3, ncol=1) 
+solid1 = solid1 + scale_fill_gradient(name="Relative\nAbundance", 
+                                     high= "mediumpurple3", low= "ivory")
+ggsave("SA_BetaDiversityITS_solid.jpg", width = 8, height = 6)
+
+liquid1 =plot_heatmap(liquid, "NMDS", "bray", "Batch", "Species", na.value="white", title= "Beta Diversity - Bray Curtis NMDS Plot - Liquid Samples", sample.order = custom_orderL)
+liquid1 = liquid1 + facet_wrap(vars(Substrate), nrow=3, ncol=1) 
+liquid1 = liquid1 + scale_fill_gradient(name="Relative\nAbundance", 
+                                      high= "mediumpurple3", low= "ivory")
+ggsave("SA_BetaDiversityITS_liquid.jpg", width = 8, height = 6)
+
+
+#Plotting 16S data solid and liquid separately, heatmap of Bray Curtis NMDS
+liquid2 =plot_heatmap(bacteriaL, "NMDS", "bray", "Batch", "Genus", na.value="white", title= "Beta Diversity - Bray Curtis NMDS Plot - Liquid Samples", sample.order = custom_orderL)
+liquid2 = liquid2 + facet_wrap(vars(Substrate), nrow=3, ncol=1) 
+liquid2 = liquid2 + scale_fill_gradient(name="Relative\nAbundance", 
+                                      high= "mediumpurple3", low= "ivory")
+ggsave("SA_BetaDiversity16_liquid.jpg", width = 8, height = 6)
+
+solid2 =plot_heatmap(bacteriaS, "NMDS", "bray", "Batch", "Genus", na.value="white", title= "Beta Diversity - Bray Curtis NMDS Plot - Solid Samples", sample.order = custom_orderS)
+solid2 = solid2 + facet_wrap(vars(Substrate), nrow=3, ncol=1) 
+solid2 = solid2 + scale_fill_gradient(name="Relative\nAbundance", 
+                                high= "mediumpurple3", low= "ivory")
+ggsave("SA_BetaDiversity16_solid.jpg", width = 8, height = 6)
+
+
+#Bray-curtis NMDS plot for ITS data, use sequential color gradient, look into open and closed ended shapes 
+#Polygons connecting based on substrate
+P1= plot_ordination(adapt_ITS, adapt_ITS.ordA, "Samples", color="Batch", title= "Fungal Beta Diversity - Bray-Curtis NMDS plot")
+P1= P1 + facet_grid(Phase ~ Substrate)
+P1= P1 + geom_polygon(aes(fill=Batch)) +
+  scale_fill_brewer(type="seq", palette="Reds", aesthetics = c("color", "fill")) + theme_dark() +
+  theme(strip.text.x = element_text(size = 12, colour = "ivory", face="bold")) +
+  theme(strip.text.y = element_text(size = 12, colour = "ivory", face="bold")) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  theme(axis.text = element_text(color = "black", size = 12)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+ggsave("SA_BetaDiversity_ITS_Polygons.jpg", width = 8, height = 6)
+
+#Bray-curtis NMDS plot for 16S data
+P2= plot_ordination(adapt_16S, adapt_16S.ordA, "Samples", color="Batch", title= "Bacterial Beta Diversity - SCOBY Adaptation")
+P2= plot_ordination(adapt_16S, adapt_16S.ordA, "Samples", color="Batch", title= "Bacterial Beta Diversity - Bray-Curtis NMDS plot")
+P2= P2 + facet_grid(Phase ~ Substrate)
+P2= P2 + geom_polygon(aes(fill=Batch)) +
+  scale_fill_brewer(type="seq", palette="Reds", aesthetics = c("color", "fill"), guide = "legend") + theme_dark() +
+  theme(strip.text.x = element_text(size = 12, colour = "ivory", face="bold")) +
+  theme(strip.text.y = element_text(size = 12, colour = "ivory", face="bold")) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13)) +
+  theme(axis.text = element_text(color = "black", size = 12)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+ggsave("SA_BetaDiversity_16S_Polygons.jpg", width = 8, height = 6)
+
+
+
+#Other attempts to changing how it looks
+P2= plot_ordination(adapt_ITS, ordinate(adapt_ITS, "NMDS"), "Samples", 
+color="Batch", shape= "Substrate", title= "ITS Beta Diversity - SCOBY Adaptation")
+P2 = P2 + scale_fill_brewer(type="qual", palette="Set1") + facet_wrap(~Phase)
+
+P3 = plot_ordination(adapt_16S, ordinate(adapt_16S, "NMDS"), "Samples", color="Batch", shape= "Substrate", title= "16S Beta Diversity - SCOBY Adaptation")
+P3 + facet_wrap(~Phase)
+
+
+
+#Checking for errors
+any(is.na(adapt_ITS))
+any(is.na(adapt_16S))
+
+any(is.na(adapt_ITS_K))
+any(is.na(adapt_ITS_noK))
+any(is.na(adapt_16S_K))
+any(is.na(adapt_16S_noK))
+
+ps.dist1 <- phyloseq::distance(adapt_ITS_K, method="bray")
+ps_norm_df1 <- as(sample_data(adapt_ITS_K), "data.frame")
+
+ps.dist2 <- phyloseq::distance(adapt_ITS_noK, method="bray")
+ps_norm_df2 <- as(sample_data(adapt_ITS_noK), "data.frame")
+
+ps.dist3 <- phyloseq::distance(adapt_16S_K, method="bray")
+ps_norm_df3 <- as(sample_data(adapt_16S_K), "data.frame")
+
+ps.dist4 <- phyloseq::distance(adapt_16S_noK, method="bray")
+ps_norm_df4 <- as(sample_data(adapt_16S_noK), "data.frame")
+
+
+#unblocked PERMANOVA:
+set.seed(55)
+
+perm1 = adonis2(ps.dist1 ~ ps_norm_df1$Substrate + ps_norm_df1$Batch + ps_norm_df1$Phase + ps_norm_df1$Substrate*ps_norm_df1$Batch*ps_norm_df1$Phase, permutations = 10000)
+perm1
+
+perm2 = adonis2(ps.dist2 ~ ps_norm_df2$Substrate + ps_norm_df2$Batch + ps_norm_df2$Phase + ps_norm_df2$Substrate*ps_norm_df2$Batch*ps_norm_df2$Phase, permutations = 10000)
+perm2
+
+perm3 = adonis2(ps.dist3 ~ ps_norm_df3$Substrate + ps_norm_df3$Batch +  ps_norm_df3$Phase + ps_norm_df3$Substrate*ps_norm_df3$Batch*ps_norm_df3$Phase, permutations = 10000)
+perm3
+
+perm4 = adonis2(ps.dist4 ~ ps_norm_df4$Substrate + ps_norm_df4$Batch + ps_norm_df4$Phase + ps_norm_df4$Substrate*ps_norm_df4$Batch*ps_norm_df4$Phase, permutations = 10000)
+perm4
+```
+
+#NMR data Analysis
+```{r}
+library(ggfortify)
+library(tidyverse)
+library(readxl)
+library(FactoMineR)
+library(factoextra)
+library(scatterplot3d)
+library(ggplot2)
+library(colorspace)
+library(patchwork)
+
+graph = read_excel("SA_metabolites_graph.xlsx")
+concentrations = read_excel("SA_metabolites.xlsx")
+concentrations_noK = read_excel("SA_metabolites_noK.xlsx")
+meta = read_excel("SA_metabolites_edited.xlsx")
+
+
+Substrate= graph$Substrate
+Batch= graph$Batch
+Substrate= as.factor(Substrate)
+Batch= as.factor(Batch)
+acetate = graph$Acetate
+u1 = graph$Acetate_upper
+l1 = graph$Acetate_lower
+lactate = graph$Lactate
+u2 = graph$Lactate_upper
+l2= graph$Lactate_lower
+
+Substrate= concentrations$Substrate
+Batch= concentrations$Batch
+Substrate= as.factor(Substrate)
+Batch= as.factor(Batch)
+Acetate = concentrations$Acetate
+Acetoin = concentrations$Acetoin
+Alanine = concentrations$Alanine
+Butyrate = concentrations$Butyrate
+Choline = concentrations$Choline
+Citrate = concentrations$Citrate
+Creatinine = concentrations$Creatinine
+Ethanol = concentrations$Ethanol
+Fructose = concentrations$Fructose
+Galactose = concentrations$Galactose
+Glucose = concentrations$Glucose
+Glutamate = concentrations$Glutamate
+Isobutyrate = concentrations$Isobutyrate
+Lactate = concentrations$Lactate
+Lactose = concentrations$Lactose
+Malonate = concentrations$Malonate
+Methylamine = concentrations$Methylamine
+Sucrose = concentrations$Sucrose
+Valine = concentrations$Valine
+Res_sugars = concentrations$Residual_sugar
+
+
+Substrate= concentrationsK$Substrate
+Batch= concentrationsK$Batch
+Substrate= as.factor(Substrate)
+Batch= as.factor(Batch)
+Acetate = concentrationsK$Acetate
+Acetoin = concentrationsK$Acetoin
+Alanine = concentrationsK$Alanine
+Butyrate = concentrationsK$Butyrate
+Choline = concentrationsK$Choline
+Citrate = concentrationsK$Citrate
+Creatinine = concentrationsK$Creatinine
+Ethanol = concentrationsK$Ethanol
+Fructose = concentrationsK$Fructose
+Galactose = concentrationsK$Galactose
+Glucose = concentrationsK$Glucose
+Glutamate = concentrationsK$Glutamate
+Isobutyrate = concentrationsK$Isobutyrate
+Lactate = concentrationsK$Lactate
+Lactose = concentrationsK$Lactose
+Malonate = concentrationsK$Malonate
+Methylamine = concentrationsK$Methylamine
+Sucrose = concentrationsK$Sucrose
+Valine = concentrationsK$Valine
+
+
+Substrate= concentrations_noK$Substrate
+Batch= concentrations_noK$Batch
+Substrate= as.factor(Substrate)
+Batch= as.factor(Batch)
+Acetate = concentrations_noK$Acetate
+Acetoin = concentrations_noK$Acetoin
+Alanine = concentrations_noK$Alanine
+Butyrate = concentrations_noK$Butyrate
+Choline = concentrations_noK$Choline
+Citrate = concentrations_noK$Citrate
+Creatinine = concentrations_noK$Creatinine
+Ethanol = concentrations_noK$Ethanol
+Galactose = concentrations_noK$Galactose
+Glucose = concentrations_noK$Glucose
+Glutamate = concentrations_noK$Glutamate
+Isobutyrate = concentrations_noK$Isobutyrate
+Lactate = concentrations_noK$Lactate
+Lactose = concentrations_noK$Lactose
+Malonate = concentrations_noK$Malonate
+Methylamine = concentrations_noK$Methylamine
+Valine = concentrations_noK$Valine
+
+
+
+Substrate= meta$Substrate
+Batch= meta$Batch
+metabolites= meta$Metabolites
+c=meta$Concentration
+c1=meta$Concentration1
+c2=meta$Concentration2
+sugar=meta$Sugars
+da=meta$Dairy_aroma
+Substrate= as.factor(Substrate)
+Batch= as.factor(Batch)
+metabolites= as.factor(metabolites)
+sugar= as.factor(sugar)
+```
+
+
+#Covariance matrix before PCA
+```{r}
+covariance = cov(concentrations[,-c(1:2)])
+```
+
+
+#Removes columns 1 and 2
+```{r}
+library(ggfortify)
+plot = prcomp(concentrations[,-c(1:2)], scale. = TRUE)
+
+PC1<-plot$x[,1]
+PC2<-plot$x[,2]
+PC3<-plot$x[,3]
+
+
+ggplot(concentrations, 
+       aes(x = PC1, 
+           y = PC2, 
+           color = Batch, shape = Substrate)) +
+  geom_point() +
+  stat_ellipse()
+
+ggplot(concentrations, 
+       aes(x = PC1, 
+           y = PC3, 
+           color = Batch, shape = Substrate)) +
+  geom_point() +
+  stat_ellipse()
+
+ggplot(concentrations, 
+       aes(x = PC2, 
+           y = PC3, 
+           color = Batch, shape = Substrate)) +
+  geom_point() +
+  stat_ellipse()
+
+
+#Using ggfortify 
+PCA = autoplot(plot, data = concentrations, color = "Substrate",loadings = TRUE, loadings.colour = 'blue',
+         loadings.label = TRUE, loadings.label.size = 3, loadings.label.vjust = 2, loadings.label.hjust=1, frame = TRUE, frame.type = 'norm')
+ggsave("SA_PCA.jpg", width = 8, height = 6)
+```
+#Not as helpful code for making biplots and PCAs with ellipses
+```{r}
+#Creates a biplot
+biplot(plot, scale = 0, expand = 2)
+
+#Ellipse PCA plot
+fviz_pca_biplot(plot, 
+             habillage=concentrations$Substrate,
+             palette = "lancet", label = "none", addEllipses=TRUE)
+
+#Calculate total variance explained by each principal component
+var_explained = plot$sdev^2 / sum(plot$sdev^2)
+
+#create scree plot to look at % variation explained by PC 
+qplot(c(1:20), var_explained) + 
+  geom_line() + 
+  xlab("Principal Component") + 
+  ylab("Variance Explained") +
+  ggtitle("Scree Plot") +
+  ylim(0, 1)
+```
+
+#Bar graph with meta data included in structure of the spreadsheet, need to add st dev error bars. Make a spreadsheet that does not have citrate and other sugars like fructose/sucrose
+```{r}
+plot1 = ggplot(meta, aes(fill = metabolites, x=Batch, y=c)) +
+  geom_bar(stat="identity", position=position_dodge(), width = 1) +
+  facet_wrap(~Substrate) +
+  labs(title = "Major fermentation metabolites", x="Batch", y="Concentration (mM)") +
+  scale_x_continuous(limits = c(0, 8), breaks = c(1, 2, 3, 4, 5, 6, 7, 8)) +
+  theme(axis.title = element_text(size = 13, color = "black", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=13, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13))
+plot1 = plot1 + scale_fill_manual(name="Metabolites", labels=c("Acetate", "Citrate", "Ethanol", "Lactate"), values = c("coral", "green3", "aquamarine2", "purple"))
+   ggsave("SA_acids.jpg", width = 8, height = 2)
+
+
+plot2 = ggplot(meta, aes(fill = sugar, x=Batch, y=c1)) +
+  geom_bar(stat ="identity", position=position_dodge()) +
+  facet_wrap(~Substrate) +
+  labs(title = "Residual Sugars", x="Batch", y="Concentration (mM)") +
+    theme(axis.title = element_text(size = 14, color = "black", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=16, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13))
+plot2 = plot2 + scale_fill_manual(name="Sugars", labels=c("Fructose", "Galactose", "Glucose", "Lactose", "Sucrose"),
+values=c("violet", "skyblue", "orange", "red2", "green2"))
+ggsave("SA_ferm_metab.jpg", width = 8, height = 2)
+
+#Need to add plot for dairy aroma compounds (Acetoin, Butyrate, Isobutyrate)
+plot3 = ggplot(meta, aes(fill = da, x=Batch, y=c2)) +
+  geom_bar(stat ="identity", position=position_dodge()) +
+  facet_wrap(~Substrate) +
+  labs(title = "Dairy aroma compounds", x="Batch", y="Concentration (mM)") +
+    theme(axis.title = element_text(size = 14, color = "black", face="bold")) +
+  theme(axis.text = element_text(color = "black", size = 13)) +
+  theme(legend.title = element_text(colour="black", size=16, face="bold")) +
+  theme(legend.text = element_text(colour="black", size = 13))
+plot3 = plot3 + scale_fill_manual(name="Dairy aroma compounds", labels=c("Acetoin", "Butyrate", "Isobutyrate"),
+values=c("salmon", "hotpink", "brown"))
+ggsave("SA_ferm_metab.jpg", width = 8, height = 2)
+
+#Need to add plots with other measured metabolites, likely for supplementary??
+```
+
+#Patchwork to put together graphs
+```{r}
+plot1 + plot2
+```
+
+
+#MANOVA Analysis to determine relationship of continuous dependent variables and discrete independent variables
+```{r}
+model <- manova(cbind(Acetate, Ethanol, Lactate, Lactose, Glucose, Galactose, Acetoin, Isobutyrate, Butyrate, Citrate, Choline, Creatinine, Malonate, Methylamine) ~ Substrate*Batch, data = concentrations_noK)
+
+summary(model)
+
+summary.aov(model)
+```
+
+
+#Paired t-test with metabolites making comparisons between batches for a substrate with wheys only
+```{r}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+
+set.seed(123)
+concentrations_noK %>% sample_n_by(Substrate, size = 1)
+
+concentrations_noK <- concentrations_noK %>%
+  convert_as_factor(Substrate, Batch)
+
+set.seed(123)
+concentrations_noK %>% sample_n_by(Substrate, Batch, size = 1)
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Acetate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Ethanol ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Lactate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Citrate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Lactose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Galactose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Glucose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Butyrate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Isobutyrate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Acetoin ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Malonate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Methylamine ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrations_noK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Choline ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+```
+#Paired t-test with metabolites making comparisons between batches for a substrate with wheys and kombucha (hold off on for now). Using the SA_metabolites sheet
+```{r}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+
+set.seed(123)
+concentrationsK %>% sample_n_by(Substrate, size = 1)
+
+concentrationsK <- concentrationsK %>%
+  convert_as_factor(Substrate, Batch)
+
+set.seed(123)
+concentrationsK %>% sample_n_by(Substrate, Batch, size = 1)
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Acetate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Ethanol ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Lactate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Citrate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Lactose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Sucrose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Galactose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Glucose ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Butyrate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Isobutyrate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Acetoin ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Malonate ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Methylamine ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+
+stat.test <- concentrationsK %>%
+  group_by(Substrate) %>%
+  pairwise_t_test(
+    Choline ~ Batch, paired = TRUE, 
+    p.adjust.method = "bonferroni"
+    ) %>%
+  select(-df, -statistic, -p)
+stat.test
+```
+
+#Running a two-sample t-test to see if theres a difference overall between substrates. Ideally, I would like to see the batch variation, so maybe do a ANOVA instead. Alternative is two-sided because we are testing if the true means is 0 or not and we can understand which mean is larger, which is the benefit
+```{r}
+t.test(Acetate~Substrate, data = concentrations_noK, alternative="two.sided")
+
+t.test(Lactate~Substrate, data = concentrations_noK, alternative="two.sided")
+
+t.test(Citrate~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Ethanol~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Lactose~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Galactose~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Glucose~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Butyrate~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Isobutyrate~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Acetoin~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Choline~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Creatinine~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Methylamine~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+
+t.test(Malonate~Substrate*Batch, data = concentrations_noK, alternative="two.sided")
+```
+#To look at differences between substrates when we include kombucha in the data set 
+```{r}
+#Creating aov object
+metab_aov <- aov(Acetate ~ Substrate*Batch)
+metab_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab_aov)
+
+
+metab1_aov <- aov(Ethanol ~ Substrate*Batch)
+metab1_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab1_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab1_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab1_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab1_aov)
+
+
+metab2_aov <- aov(Citrate ~ Substrate*Batch)
+metab2_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab2_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab2_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab2_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab2_aov)
+
+metab3_aov <- aov(Galactose ~ Substrate*Batch)
+metab3_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab3_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab3_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab3_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab3_aov)
+
+
+metab4_aov <- aov(Lactate ~ Substrate*Batch)
+metab4_aov
+
+#Looking at QQ-plot to assess normality
+plot(metab4_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab4_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab4_aov)
+
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab4_aov)
+
+
+
+metab5_aov <- aov(Glucose ~ Substrate*Batch)
+metab5_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab5_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab5_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab5_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab5_aov)
+
+metab6_aov <- aov(Lactose ~ Substrate*Batch)
+metab6_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab6_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab6_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab6_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab6_aov)
+
+
+sugars_aov <- aov(Res_sugars ~ Substrate*Batch)
+sugars_aov
+
+#Looking at QQ-plot to assess normality
+plot(sugars_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(sugars_aov, which=1)
+
+
+#Creating ANOVA table
+anova(sugars_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(sugars_aov)
+
+
+
+metab7_aov <- aov(Acetoin ~ Substrate*Batch)
+metab7_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab7_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab7_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab7_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab7_aov)
+
+metab8_aov <- aov(Butyrate ~ Substrate*Batch)
+metab8_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab8_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab8_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab8_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab8_aov)
+
+metab9_aov <- aov(Isobutyrate ~ Substrate*Batch)
+metab9_aov
+
+
+#Looking at QQ-plot to assess normality
+plot(metab9_aov, which=2)
+
+#Looking at residuals plot to assess equal variance. 
+plot(metab9_aov, which=1)
+
+
+#Creating ANOVA table
+anova(metab9_aov)
+
+#Tukey HSD Test
+options(max.print=1000000)
+TukeyHSD(metab9_aov)
+```
+#Heatmap with all the variables measured and looking at sequential batches
+```{r}
+library(readxl)
+library(ggplot2)
+
+sig = read_excel("Statistical_significance_table1.xlsx")
+
+Variable = sig$Variable
+Model = sig$Model
+p=sig$p_value
+p=as.numeric(p)
+
+
+ggplot(sig, aes(x = Model, y = Variable, fill = p)) +
+  geom_tile(na.rm = TRUE) +
+  scale_fill_gradient(low = "red", high = "white") +
+  labs(title = "Heatmap of p-values", x = "Model", y = "Variable", fill = "p-value") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) +
+  theme_minimal()
+  ggsave("Heatmap_SA_pvalues.jpeg", width = 8, height = 6)
+```
+
+
+
+
+```{r}
+library(corrplot)
+library(readxl)
+
+meta= read_excel("SA_linearmodel.xlsx")
+
+
+Tube = meta$Tube
+Substrate = meta$Substrate
+Batch = meta$Batch
+Phase =meta$Phase
+Batch=as.factor(Batch)
+Susbtrate=as.factor(Substrate)
+Expt = meta$Experiment
+delta_pellicle = meta$delta_pellicle
+delta_pH = meta$delta_pH
+terminal_pH = meta$Terminal_pH
+Brux = meta$B_brux
+Anomalus = meta$B_anomalus
+Zygo = meta$Zygo
+Star = meta$Starmerella
+Aceto = meta$Acetobacter
+Glucono = meta$Gluconobacter
+Komag =meta$Komagataeibacter
+Leuco = meta$Leuconostoc
+Acetate = meta$Acetate
+Butyrate =meta$Butyrate
+Choline =meta$Choline
+Citrate = meta$Citrate
+Creatinine = meta$Creatinine
+Ethanol = meta$Ethanol
+Gal = meta$Galactose
+Glu = meta$Glucose
+Gluta = meta$Glutamate
+Isobut =meta$Isobutyrate
+Lactate =meta$Lactate
+Lactose =meta$Lactose
+Malonate =meta$Malonate
+Methylamine =meta$Methylamine
+Valine =meta$Valine
+
+#Create correlation matrix
+my_cor = cor(meta[,-c(1:5)])
+
+#Plot out correlations
+corplot = corrplot(my_cor)
+
+#Heatmap
+heatmap(x = my_cor, symm = TRUE)
+```
+
+#ANOVA for RA of microbes based on Batch, Substrate, Phase
+```{r}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+
+microbe= read_excel("SA_microbedata_K.xlsx")
+
+
+Tube = microbe$Tube
+Substrate = microbe$Substrate
+Batch = microbe$Batch
+Phase =microbe$Phase
+Batch=as.factor(Batch)
+Susbtrate=as.factor(Substrate)
+Expt = microbe$Experiment
+delta_pellicle = microbe$delta_pellicle
+delta_pH = microbe$delta_pH
+terminal_pH = microbe$Terminal_pH
+Brux = microbe$B_brux
+Anomalus = microbe$B_anomalus
+Zygo = microbe$Zygo
+Star = microbe$Starmerella
+Aceto = microbe$Acetobacter
+Glucono = microbe$Gluconobacter
+Komag =microbe$Komagataeibacter
+Leuco = microbe$Leuconostoc
+
+
+
+#Creating aov object
+Aceto_aov <- aov(Aceto ~ Substrate*Batch*Phase)
+Aceto_aov
+
+#Creating ANOVA table
+anova(Aceto_aov)
+
+#Tukey HSD Test
+TukeyHSD(Aceto_aov)
+
+#Creating aov object
+Komag_aov <- aov(Komag ~ Substrate*Batch*Phase)
+Komag_aov
+
+#Creating ANOVA table
+anova(Komag_aov)
+
+#Tukey HSD Test
+TukeyHSD(Komag_aov)
+
+#Creating aov object
+Brux_aov <- aov(Brux ~ Substrate*Batch*Phase)
+Brux_aov
+
+#Creating ANOVA table
+anova(Brux_aov)
+
+#Tukey HSD Test
+TukeyHSD(Brux_aov)
+
+#Creating aov object
+Anom_aov <- aov(Anomalus ~ Substrate*Batch*Phase)
+Anom_aov
+
+#Creating ANOVA table
+anova(Anom_aov)
+
+#Tukey HSD Test
+TukeyHSD(Anom_aov)
+
+#Creating aov object
+Leuc_aov <- aov(Leuco ~ Substrate*Batch*Phase)
+Leuc_aov
+
+#Creating ANOVA table
+anova(Leuc_aov)
+
+#Tukey HSD Test
+TukeyHSD(Leuc_aov)
+
+
+#Creating aov object
+Zygo_aov <- aov(Zygo ~ Substrate*Batch*Phase)
+Zygo_aov
+
+#Creating ANOVA table
+anova(Zygo_aov)
+
+#Tukey HSD Test
+TukeyHSD(Zygo_aov)
+
+
+#Creating aov object
+Star_aov <- aov(Star ~ Substrate*Batch*Phase)
+Star_aov
+
+#Creating ANOVA table
+anova(Star_aov)
+
+#Tukey HSD Test
+TukeyHSD(Star_aov)
+```
+#With kombucha 
+```{r}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+
+microbe= read_excel("SA_microbedata_K.xlsx")
+
+
+Tube = microbe$Tube
+Substrate = microbe$Substrate
+Batch = microbe$Batch
+Phase =microbe$Phase
+Batch=as.factor(Batch)
+Susbtrate=as.factor(Substrate)
+Expt = microbe$Experiment
+delta_pellicle = microbe$delta_pellicle
+delta_pH = microbe$delta_pH
+terminal_pH = microbe$Terminal_pH
+Brux = microbe$B_brux
+Anomalus = microbe$B_anomalus
+Zygo = microbe$Zygo
+Star = microbe$Starmerella
+Aceto = microbe$Acetobacter
+Glucono = microbe$Gluconobacter
+Komag =microbe$Komagataeibacter
+Leuco = microbe$Leuconostoc
+
+
+
+#Creating aov object
+Aceto_aov <- aov(Aceto ~ Substrate*Batch*Phase)
+Aceto_aov
+
+#Creating ANOVA table
+anova(Aceto_aov)
+
+#Tukey HSD Test
+TukeyHSD(Aceto_aov)
+
+#Creating aov object
+Komag_aov <- aov(Komag ~ Substrate*Batch*Phase)
+Komag_aov
+
+#Creating ANOVA table
+anova(Komag_aov)
+
+#Tukey HSD Test
+TukeyHSD(Komag_aov)
+
+#Creating aov object
+Brux_aov <- aov(Brux ~ Substrate*Batch*Phase)
+Brux_aov
+
+#Creating ANOVA table
+anova(Brux_aov)
+
+#Tukey HSD Test
+TukeyHSD(Brux_aov)
+
+#Creating aov object
+Anom_aov <- aov(Anomalus ~ Substrate*Batch*Phase)
+Anom_aov
+
+#Creating ANOVA table
+anova(Anom_aov)
+
+#Tukey HSD Test
+TukeyHSD(Anom_aov)
+
+#Creating aov object
+Leuc_aov <- aov(Leuco ~ Substrate*Batch*Phase)
+Leuc_aov
+
+#Creating ANOVA table
+anova(Leuc_aov)
+
+#Tukey HSD Test
+TukeyHSD(Leuc_aov)
+
+
+#Creating aov object
+Zygo_aov <- aov(Zygo ~ Substrate*Batch*Phase)
+Zygo_aov
+
+#Creating ANOVA table
+anova(Zygo_aov)
+
+#Tukey HSD Test
+TukeyHSD(Zygo_aov)
+
+
+#Creating aov object
+Star_aov <- aov(Star ~ Substrate*Batch*Phase)
+Star_aov
+
+#Creating ANOVA table
+anova(Star_aov)
+
+#Tukey HSD Test
+TukeyHSD(Star_aov)
+```
+
+#Restabilization delta-pH and pellicle 
+```{r}
+#Reading in data set with only gouda and QF
+restab <- read.csv("SA_delta_values_restabilization.csv", stringsAsFactors=TRUE)
+restab
+
+pH_change = restab$delta_pH
+Batch = restab$Batch
+Substrate = restab$Substrate
+pellicle_change = restab$delta_pellicle
+
+
+#Turns what R thinks is a "numeric" variable into a factor, allowing a TukeyHSD test to be ran
+Substrate = as.factor(Substrate)
+Batch = as.factor(Batch)
+
+#Creating aov object
+restab_pH_aov <- aov(pH_change ~ Substrate * Batch)
+restab_pH_aov
+
+#Creating ANOVA table
+anova(restab_pH_aov)
+
+#Tukey HSD Test
+TukeyHSD(restab_pH_aov)
+
+
+
+#Creating aov object for pellicle
+restab_pellicle_aov <- aov(pellicle_change ~ Substrate * Batch)
+restab_pellicle_aov
+
+#Creating ANOVA table
+anova(restab_pellicle_aov)
+
+#Tukey HSD Test
+TukeyHSD(restab_pellicle_aov)
+```
+
